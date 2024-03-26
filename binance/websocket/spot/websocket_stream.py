@@ -5,18 +5,18 @@ from binance.websocket.websocket_client import BinanceWebsocketClient
 
 class SpotWebsocketStreamClient(BinanceWebsocketClient):
     def __init__(
-        self,
-        stream_url="wss://stream.binance.com:9443",
-        on_message=None,
-        on_open=None,
-        on_close=None,
-        on_error=None,
-        on_ping=None,
-        on_pong=None,
-        is_combined=False,
-        timeout=None,
-        logger=None,
-        proxies: Optional[dict] = None,
+            self,
+            stream_url="wss://stream.binance.com:9443",
+            on_message=None,
+            on_open=None,
+            on_close=None,
+            on_error=None,
+            on_ping=None,
+            on_pong=None,
+            is_combined=False,
+            timeout=None,
+            logger=None,
+            proxies: Optional[dict] = None,
     ):
         if is_combined:
             stream_url = stream_url + "/stream"
@@ -62,7 +62,35 @@ class SpotWebsocketStreamClient(BinanceWebsocketClient):
 
         self.send_message_to_server(stream_name, action=action, id=id)
 
-    def kline(self, symbol: str, interval: str, id=None, action=None):
+    def kline(self, symbols: list, interval: str, id=None, action=None):
+        """Kline/Candlestick Streams
+
+        This function pushes updates to the current klines/candlestick every second for a list of symbols.
+
+        Stream Names: for each symbol in symbols, a stream name is formatted as <symbol>@kline_<interval>
+
+        interval:
+        m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
+
+        Possible intervals include:
+        - 1m, 3m, 5m, 15m, 30m
+        - 1h, 2h, 4h, 6h, 8h, 12h
+        - 1d, 3d
+        - 1w
+        - 1M
+
+        Update Speed: 2000ms
+
+        :param symbols: List of symbol strings.
+        :param interval: String specifying the interval.
+        :param id: Optional id for the message.
+        :param action: Optional action to be performed.
+        """
+        stream_names = ["{}@kline_{}".format(symbol.lower(), interval) for symbol in symbols]
+
+        self.send_message_to_server(stream_names, action=action, id=id)
+
+    '''def kline(self, symbol: str, interval: str, id=None, action=None):
         """Kline/Candlestick Streams
 
         The Kline/Candlestick Stream push updates to the current klines/candlestick every second.
@@ -92,7 +120,7 @@ class SpotWebsocketStreamClient(BinanceWebsocketClient):
         """
         stream_name = "{}@kline_{}".format(symbol.lower(), interval)
 
-        self.send_message_to_server(stream_name, action=action, id=id)
+        self.send_message_to_server(stream_name, action=action, id=id)'''
 
     def mini_ticker(self, symbol=None, id=None, action=None, **kwargs):
         """Individual symbol or all symbols mini ticker
@@ -146,7 +174,7 @@ class SpotWebsocketStreamClient(BinanceWebsocketClient):
         )
 
     def partial_book_depth(
-        self, symbol: str, level=5, speed=1000, id=None, action=None, **kwargs
+            self, symbol: str, level=5, speed=1000, id=None, action=None, **kwargs
     ):
         """Partial Book Depth Streams
 
